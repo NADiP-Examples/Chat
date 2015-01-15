@@ -1,0 +1,7 @@
+# *.[oa]
+# *~
+db.*
+.idea*
+__pyc*
+*.pyc
++Temp/*
