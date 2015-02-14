@@ -28,8 +28,8 @@ def get_data_from_server():
 
 
 #авторизация пользователя
-USER_NAME = input("Enter you name: ")
-# USER_NAME = 'user'
+# USER_NAME = input("Enter you name: ")
+USER_NAME = 'user'
 
 root = Tk()
  
