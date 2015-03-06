@@ -4,6 +4,10 @@ import socket
 from threading import Thread
 from shortcuts import parser_command
 
+# CONSTANTS
+IP = '192.168.1.2'
+PORT = 9090
+
 
 def receive(conn):
     """Получает и выводит сообщение на экран"""
@@ -84,7 +88,7 @@ def display_message(message):
 
 def parse_smiles(message):
     """Парсим смайлы"""
-    print("mes: %s" % message)
+    # print("mes: %s" % message)
     for txt_smile in SMILES.keys():
         if txt_smile in message:
             cut_string = message.partition(txt_smile)
@@ -103,7 +107,7 @@ def connect_to_server(event):
     """ bind """
     global SOCK
     SOCK = socket.socket()
-    SOCK.connect(('127.0.0.1', 9090))
+    SOCK.connect((IP, PORT))
     SOCK.setblocking(0)
     th1 = Thread(target=receive, args=(SOCK,))
     th1.start()
