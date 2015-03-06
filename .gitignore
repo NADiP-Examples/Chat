@@ -4,4 +4,4 @@ db.*
 .idea*
 __pyc*
 *.pyc
-+Temp/*
+Temp/*

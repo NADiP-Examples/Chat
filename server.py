@@ -1,52 +1,62 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import socket, threading
+import socket
+from threading import Thread
 
-IP = ""
-PORT = 14900
 
-class Connect(threading.Thread):
-    def __init__(self, sock, addr):
-        self.sock = sock
-        self.addr = addr
-        threading.Thread.__init__(self)
-        print(self.addr,"...connected")
-        ListClients[self.addr] = self.sock
+def connect(conn, clients):
+    # Получает сообщение и отправляет его всем клиентам
+    while True:
+        try:
+            data = conn.recv(1024)
+            # Определение первого сообщения подключившегося клиента
+            if not (conn in clients):
+                data = data.decode()
+                clients.append(conn)  # Добавление в список клиентов
+                g_nicks.append(data)  # Добавление в список ников
 
-    def run (self):
-        while 1:
-            try:
-                buf = self.sock.recv(2048)
-                print ("!!!",self.addr,buf)
-                print("data send")
-                self.send_message_to_all(buf)
+                # Рассылка информации об добавлении клиента в панель "Ников"
+                nick_send = data
+                nick_send = '#nickadd:'+nick_send
+                for el in clients:
+                    el.send(nick_send.encode())
 
-            except socket.error:
-                # print(self.addr[0])
-                # print(ListClients[self.addr][1])
-                msg = "disconnected"
-                print(msg)
-                del ListClients[self.addr]
-                print("all Clients = ", ListClients)
-                break
+                welcome_message = "Welcome, %s" % data
+                conn.send(welcome_message.encode())
+            else:
+                data = data.decode()
 
-    def send_message_to_all(self, message):
-        for client in ListClients.values():
-            print(message)
-            print('client = ', client)
-            client.send(message)
+                num_conn = clients.index(conn)
+                nick_send = "%s:%s" % (g_nicks[num_conn], data)
+                # nick_send = nick[num_conn]
+                # nick_send = nick_send+':'
+                # nick_send = nick_send+data
 
-#Список клиентов
-ListClients = {}
+                for el in clients:
+                    el.send(nick_send.encode())
+        # Отключения клиента без ошибки
+        except (ConnectionResetError, BrokenPipeError):
+            print('disconnected')
+            num_conn = clients.index(conn)
+            nick_send = g_nicks[num_conn]
+            g_nicks.remove(nick_send)  # Удаление из списка ников
+            clients.remove(conn)  # Удаление из списка подключений
+            # Рассылка информации об удалении клиента из панели "Ников"
+            for el in clients:
+                nick_send = '#nickdelete:'+nick_send
+                el.send(nick_send.encode())
+            return
 
+# GLOBALS
+g_nicks = []
+
+# MAIN
 sock = socket.socket()
-sock.bind((IP, PORT))
-sock.listen(4)
-connects = [] #Все клиентские подлючения
-
+sock.bind(("", 9090))
+sock.listen(1)
+clients = []  # FIXME:Действительно ли нужен глобальный список, если он используется только в колальной области функции?
+last_massageX4 = []
 
 while True:
     conn, addr = sock.accept()
-    Connect(conn, addr).start()
-
-
+    print('connected:', addr)
+    th = Thread(target=connect, args=(conn, clients))
+    th.start()
