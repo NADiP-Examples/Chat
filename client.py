@@ -5,7 +5,7 @@ from threading import Thread
 from shortcuts import parser_command
 
 # CONSTANTS
-IP = '192.168.1.2'
+IP = '127.0.0.1'
 PORT = 9090
 
 
@@ -77,22 +77,48 @@ def send(event):
 def display_message(message):
     """Выаодит соотщение"""
     parse_res = parse_smiles(message)
-    # print(parse_res)
     if parse_res:
-        tex.insert(END, parse_res[0])
-        tex.image_create(END, image=parse_res[1])
-        tex.insert(END, parse_res[-1]+"\n")
+        for el in parse_res:
+            if isinstance(el, PhotoImage):
+                tex.image_create(END, image=el)
+                continue
+            tex.insert(END, el)
+        tex.insert(END, '\n')
     else:
         tex.insert(END, message+"\n")
 
 
 def parse_smiles(message):
     """Парсим смайлы"""
-    # print("mes: %s" % message)
+    sta = [message]
     for txt_smile in SMILES.keys():
-        if txt_smile in message:
-            cut_string = message.partition(txt_smile)
-            return cut_string[0], SMILES[txt_smile], cut_string[-1]
+        sta = parse(sta, txt_smile)
+    for ind, el in enumerate(sta):
+        for txt_smile in SMILES.keys():
+            if el==txt_smile:
+                sta[ind] = SMILES[txt_smile]
+    return sta
+
+
+def parse(lt,sml):
+    pl = []
+    crt = []
+    if lt==[]:
+        return []
+    for st in lt:
+        ar = list(st.partition(sml))
+        while (sml in ar[-1]) and (ar[-1]!=sml):
+            crt = list(ar[-1].partition(sml))
+            ar.pop(-1)
+            for el in crt:
+                if el=='':
+                    continue
+                ar.append(el)
+        for el in ar:
+            if el=='':
+                continue
+            pl.append(el)
+    return pl
 
 
 def on_close():
