@@ -129,7 +129,7 @@ def on_close():
     root.quit()
 
 
-def connect_to_server(event):
+def connect_to_server(event=None):
     """ bind """
     global SOCK
     SOCK = socket.socket()
@@ -148,6 +148,13 @@ def private_message(e):
 
 root = Tk()
 
+m = Menu(root)
+root.config(menu=m)
+
+fm = Menu(m)                                #создается пункт меню с размещением на основном меню (m)
+m.add_cascade(label="Меню", menu=fm)         #пункту располагается на основном меню (m)
+fm.add_command(label="Connect", command=connect_to_server)
+
 # GLOBALS
 WORK = True  # Работает ли клиент (чтобы убить все потоки клиента, при закрытии окна)
 SOCK = None  # Соккет подключения к серверу
@@ -159,7 +166,6 @@ text_frame = Frame(content_frame, bg='blue', bd=1)
 input_frame = Frame(root, bg='blue', bd=1)
 tex = Text(text_frame,)
 but = Button(input_frame, text='Отправить')
-but_conn = Button(root, text="Connect")
 label = Label(input_frame, text="new")
 list_box = Listbox(content_frame)
 ent = Entry(input_frame, width=80)
@@ -176,10 +182,8 @@ input_frame.pack(fill='both')
 label.pack(side='left', fill='both')
 ent.pack(side='left', expand=True, fill='both')
 but.pack(side='left')
-but_conn.pack(side=TOP)
 
 but.bind('<Button-1>', send)
-but_conn.bind('<Button-1>', connect_to_server)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
 
