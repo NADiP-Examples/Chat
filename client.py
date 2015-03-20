@@ -24,6 +24,8 @@ def receive(conn):
             command,value = message
             if command == 'nickadd':
                 add_nick(value)
+            if command == 'nickdelete':
+                remove_nick(value)
             message = "send command %s \n" % message[0]
             # FIXME: некорректный код, переписать (подсказка: Обратить внимание на условие)
             display_message(message)
@@ -64,7 +66,7 @@ def add_nick(nick):
 
 
 def remove_nick(nick):
-    pass
+    list_box.delete(END, nick)
 
 
 def send(event):
