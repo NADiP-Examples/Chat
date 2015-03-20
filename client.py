@@ -21,6 +21,9 @@ def receive(conn):
             continue
         message = parser_command(message)
         if isinstance(message, tuple):
+            command,value = message
+            if command == 'nickadd':
+                add_nick(value)
             message = "send command %s \n" % message[0]
             # FIXME: некорректный код, переписать (подсказка: Обратить внимание на условие)
             display_message(message)
@@ -57,9 +60,7 @@ def enter_nickname():
 
 
 def add_nick(nick):
-    list_box.insert(1, "Вася")
-    list_box.insert(2, "Петя")
-    list_box.insert(3, "Коля")
+    list_box.insert(END, nick)
 
 
 def remove_nick(nick):
@@ -183,7 +184,6 @@ but_conn.bind('<Button-1>', connect_to_server)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
 
-add_nick('new')
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 mainloop()

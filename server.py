@@ -18,7 +18,7 @@ def connect(conn, clients):
                 nick_send = '#nickadd:'+nick_send
                 for el in clients:
                     el.send(nick_send.encode())
-
+                # FIXME:Welcome добавляется к нику
                 welcome_message = "Welcome, %s" % data
                 conn.send(welcome_message.encode())
             else:
