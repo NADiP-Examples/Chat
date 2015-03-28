@@ -21,20 +21,17 @@ def receive(conn):
             continue
         message = parser_command(message)
         if isinstance(message, tuple):
-            command,value = message
+            command, value = message
             if command == 'nickadd':
                 add_nick(value)
             if command == 'nickdelete':
                 remove_nick(value)
             if command == 'listnicks':
-                value = value.split(',')
                 print(value)
+                value = value.split(',')
                 add_nicks(value)
             message = "send command %s \n" % message[0]
-            # FIXME: некорректный код, переписать (подсказка: Обратить внимание на условие)
-            display_message(message)
-        else:
-            display_message(message)
+        display_message(message)
         tex.yview(END)
 
 
@@ -64,10 +61,13 @@ def enter_nickname():
     # Показываем основное окно
     root.deiconify()
 
+
 def add_nicks(list_nicks):
-    # Добавляет ники, которые были до подключения к серверу клиента
+    # Добавляет ники, которые были до подключения клиента к серверу
     for el in list_nicks:
         list_box.insert(END, el)
+
+
 def add_nick(nick):
     # Добавляет ник в список
     list_box.insert(END, nick)
@@ -112,7 +112,7 @@ def parse_smiles(message):
     return sta
 
 
-def parse(lt,sml):
+def parse(lt, sml):
     pl = []
     crt = []
     if lt==[]:
@@ -152,7 +152,7 @@ def connect_to_server(event):
     enter_nickname()
 
 
-def private_message(e):
+def private_message(event):
     """ bind """
     # indexes = list_box.curselection()
     list_box_values = [list_box.get(idx) for idx in list_box.curselection()]
