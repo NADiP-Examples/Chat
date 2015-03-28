@@ -26,6 +26,10 @@ def receive(conn):
                 add_nick(value)
             if command == 'nickdelete':
                 remove_nick(value)
+            if command == 'listnicks':
+                value = value.split(',')
+                print(value)
+                add_nicks(value)
             message = "send command %s \n" % message[0]
             # FIXME: некорректный код, переписать (подсказка: Обратить внимание на условие)
             display_message(message)
@@ -60,12 +64,17 @@ def enter_nickname():
     # Показываем основное окно
     root.deiconify()
 
-
+def add_nicks(list_nicks):
+    # Добавляет ники, которые были до подключения к серверу клиента
+    for el in list_nicks:
+        list_box.insert(END, el)
 def add_nick(nick):
+    # Добавляет ник в список
     list_box.insert(END, nick)
 
 
 def remove_nick(nick):
+    # Удаляет ник из списка
     list_box.delete(END, nick)
 
 

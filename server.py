@@ -13,13 +13,17 @@ def connect(conn, clients):
                 clients.append(conn)  # Добавление в список клиентов
                 g_nicks.append(data)  # Добавление в список ников
 
+                # Отсылает список ников клиенту
+                g_nicks_message=','.join(g_nicks)
+                g_nicks_message='#listnicks:'+g_nicks_message
+                conn.send(g_nicks_message.encode())
+
                 # Рассылка информации об добавлении клиента в панель "Ников"
                 nick_send = data
                 nick_send = '#nickadd:'+nick_send
                 for el in clients:
                     el.send(nick_send.encode())
-                # FIXME:Welcome добавляется к нику
-                welcome_message = "Welcome, %s" % data
+                welcome_message = "Welcome, %s" % data       # FIXME: Приветствие добавляется к нику
                 conn.send(welcome_message.encode())
             else:
                 data = data.decode()
