@@ -9,6 +9,22 @@ IP = '127.0.0.1'
 PORT = 9090
 
 
+def smile_insert(event):
+    ent.insert(END, event.widget.smile_text)
+
+
+def smiles_window(e):
+    """ bind - open 'smiles window' """
+    smiles_win = Toplevel()
+    smiles_win.resizable(False, False)
+    smiles_win.wm_title("Select smiles")
+    for el in SMILES.keys():
+        but_smiles = Button(smiles_win,image=SMILES[el])
+        but_smiles.pack(side='left')
+        but_smiles.bind('<Button-1>', smile_insert)
+        but_smiles.smile_text = el
+
+
 def receive(conn):
     """Получает и выводит сообщение на экран"""
     while True:
@@ -172,18 +188,21 @@ list_box = Listbox(content_frame)
 ent = Entry(input_frame, width=80)
 scr = Scrollbar(text_frame, command=tex.yview)
 tex.configure(yscrollcommand=scr.set)
+but_sm=Button(input_frame,text='Smile')
 
 content_frame.pack(fill='both')
 text_frame.pack(side='left', fill='both')
 tex.pack(side='left', fill='both')
 scr.pack(side='right', fill='both')
 list_box.pack(side='right', fill='both')
+but_sm.pack(side='right')
 
 input_frame.pack(fill='both')
 label.pack(side='left', fill='both')
 ent.pack(side='left', expand=True, fill='both')
 but.pack(side='left')
 
+but_sm.bind('<Button-1>',smiles_window)
 but.bind('<Button-1>', send)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
