@@ -1,5 +1,6 @@
 import socket
 from threading import Thread
+import time
 
 
 def connect(conn, clients):
@@ -19,6 +20,7 @@ def connect(conn, clients):
                 for el in clients:
                     el.send(nick_send.encode())
 
+                time.sleep(0.3)
                 welcome_message = "Welcome, %s" % data
                 conn.send(welcome_message.encode())
             else:
