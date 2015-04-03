@@ -12,25 +12,29 @@ def connect(conn, clients):
             if not (conn in clients):
                 data = data.decode()
                 clients.append(conn)  # Добавление в список клиентов
+
+                # Отсылает список ников клиенту
+                if g_nicks:
+                    g_nicks_message = ','.join(g_nicks)
+                    g_nicks_message = '#listnicks:'+g_nicks_message
+                    conn.send(g_nicks_message.encode())
+
                 g_nicks.append(data)  # Добавление в список ников
 
                 # Рассылка информации об добавлении клиента в панель "Ников"
                 nick_send = data
                 nick_send = '#nickadd:'+nick_send
+                time.sleep(0.2)
                 for el in clients:
                     el.send(nick_send.encode())
-
-                time.sleep(0.3)
                 welcome_message = "Welcome, %s" % data
+                time.sleep(0.1)
                 conn.send(welcome_message.encode())
             else:
                 data = data.decode()
 
                 num_conn = clients.index(conn)
                 nick_send = "%s:%s" % (g_nicks[num_conn], data)
-                # nick_send = nick[num_conn]
-                # nick_send = nick_send+':'
-                # nick_send = nick_send+data
 
                 for el in clients:
                     el.send(nick_send.encode())
@@ -43,8 +47,7 @@ def connect(conn, clients):
             clients.remove(conn)  # Удаление из списка подключений
             # Рассылка информации об удалении клиента из панели "Ников"
             for el in clients:
-                nick_send = '#nickdelete:'+nick_send
-                el.send(nick_send.encode())
+                el.send(('#nickdelete:'+nick_send).encode())
             return
 
 # GLOBALS
@@ -54,7 +57,7 @@ g_nicks = []
 sock = socket.socket()
 sock.bind(("", 9090))
 sock.listen(1)
-clients = []  # FIXME:Действительно ли нужен глобальный список, если он используется только в колальной области функции?
+clients = []
 last_massageX4 = []
 
 while True:

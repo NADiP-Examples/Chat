@@ -33,15 +33,23 @@ def receive(conn):
         conn.setblocking(0)
         try:
             message = SOCK.recv(1024).decode()
+            print(message)
         except socket.error:  # данных нет
             continue
         message = parser_command(message)
         if isinstance(message, tuple):
+            command, value = message
+            if command == 'nickadd':
+                add_nick(value)
+            if command == 'nickdelete':
+                print(command,value)
+                remove_nick(value)
+            if command == 'listnicks':
+                print(value)
+                value = value.split(',')
+                add_nicks(value)
             message = "send command %s \n" % message[0]
-            # FIXME: некорректный код, переписать (подсказка: Обратить внимание на условие)
-            display_message(message)
-        else:
-            display_message(message)
+        display_message(message)
         tex.yview(END)
 
 
@@ -72,14 +80,22 @@ def enter_nickname():
     root.deiconify()
 
 
+def add_nicks(list_nicks):
+    # Добавляет ники, которые были до подключения клиента к серверу
+    for el in list_nicks:
+        list_box.insert(END, el)
+
+
 def add_nick(nick):
-    list_box.insert(1, "Вася")
-    list_box.insert(2, "Петя")
-    list_box.insert(3, "Коля")
+    # Добавляет ник в список
+    list_box.insert(END, nick)
 
 
 def remove_nick(nick):
-    pass
+    # Удаляет ник из списка
+    elements = list_box.get(0, list_box.size())
+    idx = elements.index(nick)
+    list_box.delete(idx)
 
 
 def send(event):
@@ -116,7 +132,7 @@ def parse_smiles(message):
     return sta
 
 
-def parse(lt,sml):
+def parse(lt, sml):
     pl = []
     crt = []
     if lt==[]:
@@ -156,7 +172,7 @@ def connect_to_server(event=None):
     enter_nickname()
 
 
-def private_message(e):
+def private_message(event):
     """ bind """
     # indexes = list_box.curselection()
     list_box_values = [list_box.get(idx) for idx in list_box.curselection()]
@@ -207,7 +223,6 @@ but.bind('<Button-1>', send)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
 
-add_nick('new')
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 mainloop()
