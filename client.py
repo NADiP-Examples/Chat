@@ -33,7 +33,7 @@ def receive(conn):
         conn.setblocking(0)
         try:
             message = SOCK.recv(1024).decode()
-            print(message)
+            # print(message)
         except socket.error:  # данных нет
             continue
         message = parser_command(message)
@@ -42,12 +42,11 @@ def receive(conn):
             if command == 'nickadd':
                 add_nick(value)
             if command == 'nickdelete':
-                print(command,value)
+                # print(command, value)
                 remove_nick(value)
             if command == 'listnicks':
-                print(value)
-                value = value.split(',')
-                add_nicks(value)
+                # print(value)
+                add_nicks(value.split(','))
             message = "send command %s \n" % message[0]
         display_message(message)
         tex.yview(END)
@@ -82,8 +81,8 @@ def enter_nickname():
 
 def add_nicks(list_nicks):
     # Добавляет ники, которые были до подключения клиента к серверу
-    for el in list_nicks:
-        list_box.insert(END, el)
+    for nick in list_nicks:
+        add_nick(nick)
 
 
 def add_nick(nick):
@@ -172,7 +171,7 @@ def connect_to_server(event=None):
     enter_nickname()
 
 
-def private_message(event):
+def private_message(events):
     """ bind """
     # indexes = list_box.curselection()
     list_box_values = [list_box.get(idx) for idx in list_box.curselection()]
