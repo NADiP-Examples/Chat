@@ -17,6 +17,7 @@ def receive(conn):
         conn.setblocking(0)
         try:
             message = SOCK.recv(1024).decode()
+            print(message)
         except socket.error:  # данных нет
             continue
         message = parser_command(message)
@@ -25,6 +26,7 @@ def receive(conn):
             if command == 'nickadd':
                 add_nick(value)
             if command == 'nickdelete':
+                print(command,value)
                 remove_nick(value)
             if command == 'listnicks':
                 print(value)
@@ -75,7 +77,9 @@ def add_nick(nick):
 
 def remove_nick(nick):
     # Удаляет ник из списка
-    list_box.delete(END, nick)
+    elements = list_box.get(0, list_box.size())
+    idx = elements.index(nick)
+    list_box.delete(idx)
 
 
 def send(event):

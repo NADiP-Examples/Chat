@@ -47,8 +47,7 @@ def connect(conn, clients):
             clients.remove(conn)  # Удаление из списка подключений
             # Рассылка информации об удалении клиента из панели "Ников"
             for el in clients:
-                nick_send = '#nickdelete:'+nick_send
-                el.send(nick_send.encode())
+                el.send(('#nickdelete:'+nick_send).encode())
             return
 
 # GLOBALS
