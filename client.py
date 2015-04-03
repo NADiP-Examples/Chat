@@ -147,6 +147,7 @@ def private_message(e):
     print(list_box_values)
 
 root = Tk()
+root.resizable(False, False)
 
 m = Menu(root)
 root.config(menu=m)
