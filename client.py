@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter.filedialog import *
-import socket
+import socket, time
 from threading import Thread
 from shortcuts import parser_command
 
@@ -65,12 +65,14 @@ def enter_nickname():
     Label(win, text="Enter nickname").pack()
     ent_nick = Entry(win)
     ent_nick.pack()
+    ent_nick.insert(END, 'User')
     but_send_nick = Button(win, text="Ok")
     but_send_nick.pack()
     but_send_nick.bind('<Button-1>', send_nick)
     ent_nick.bind('<Return>', send_nick)
     # Захватываем фокус
-    win.focus_set()
+    win.after(200, lambda: win.focus_force())
+    win.after(210, lambda: ent_nick.focus_set())
     # Скрываем основное окно
     root.withdraw()
     # Ждем закрытия данного окна
