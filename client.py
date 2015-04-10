@@ -99,8 +99,16 @@ def remove_nick(nick):
 
 def send(event):
     """bind: Отправляет сообщение на сервер"""
+    global msg_nmb, msg_list
     if SOCK:
         s = ent.get()
+        #Запоминает отправленное сообщение
+        if len(msg_list)<10:
+            msg_list.append(s)
+        else:
+            msg_list.pop(0)
+            msg_list.append(s)
+        msg_nmb = -1
         ent.delete(0, END)
         SOCK.send(s.encode())
 
@@ -179,6 +187,15 @@ def private_message(events):
     ent.insert(END, '/w %s ' % list_box_values[0])
     ent.focus_set()
 
+
+def ke_up():
+    msg_nmb+=1
+    if msg_nmb<10:
+
+
+def ke_down():
+    pass
+
 root = Tk()
 root.resizable(False, False)
 
@@ -195,6 +212,8 @@ SOCK = None  # Соккет подключения к серверу
 SMILES = {':-)': PhotoImage(file='img/Smile.gif'), '^-^': PhotoImage(file='img/a115.gif')}
 
 # MAIN
+msg_list = []
+msg_nmb = -1
 content_frame = Frame(root, bg='blue', bd=1)
 text_frame = Frame(content_frame, bg='blue', bd=1)
 input_frame = Frame(root, bg='blue', bd=1)
@@ -223,6 +242,8 @@ but_sm.bind('<Button-1>',smiles_window)
 but.bind('<Button-1>', send)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
+ent.bind('<Up>',ke_up())
+ent.bind('<Down>',ke_down())
 
 
 root.protocol("WM_DELETE_WINDOW", on_close)
