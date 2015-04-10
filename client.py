@@ -12,12 +12,13 @@ PORT = 9090
 def receive(conn):
     """Получает и выводит сообщение на экран"""
     while True:
+        # print("!!!")
         if not WORK:
             return
         conn.setblocking(0)
         try:
             message = SOCK.recv(1024).decode()
-        except socket.error:  # данных нет
+        except (socket.error, TypeError, AttributeError):  # данных нет
             continue
         message = parser_command(message)
         if isinstance(message, tuple):
@@ -56,18 +57,19 @@ def enter_nickname():
     root.deiconify()
 
 
-def add_nick(nick):
+def add_nick():
     list_box.insert(1, "Вася")
     list_box.insert(2, "Петя")
     list_box.insert(3, "Коля")
 
 
-def remove_nick(nick):
+def remove_nick():
     pass
 
 
 def send(event):
     """bind: Отправляет сообщение на сервер"""
+    print(SOCK)
     if SOCK:
         s = ent.get()
         ent.delete(0, END)
@@ -95,23 +97,23 @@ def parse_smiles(message):
         sta = parse(sta, txt_smile)
     for ind, el in enumerate(sta):
         for txt_smile in SMILES.keys():
-            if el==txt_smile:
+            if el == txt_smile:
                 sta[ind] = SMILES[txt_smile]
     return sta
 
 
-def parse(lt,sml):
+def parse(lt, sml):
     pl = []
     crt = []
-    if lt==[]:
+    if lt == []:
         return []
     for st in lt:
         ar = list(st.partition(sml))
-        while (sml in ar[-1]) and (ar[-1]!=sml):
+        while (sml in ar[-1]) and (ar[-1] != sml):
             crt = list(ar[-1].partition(sml))
             ar.pop(-1)
             for el in crt:
-                if el=='':
+                if el == '':
                     continue
                 ar.append(el)
         for el in ar:
@@ -131,34 +133,65 @@ def on_close():
 
 def connect_to_server(event=None):
     """ bind """
-    global SOCK
+    global SOCK, WORK
+    WORK = True
     SOCK = socket.socket()
     SOCK.connect((IP, PORT))
     SOCK.setblocking(0)
     th1 = Thread(target=receive, args=(SOCK,))
     th1.start()
     enter_nickname()
+    check_connect_disconnect()
 
 
-def private_message(e):
+def disconnect(event=None):
+    global WORK, SOCK
+    WORK = False
+    SOCK.close()
+    SOCK = None
+    check_connect_disconnect()
+
+
+def check_connect_disconnect():
+    print("check", WORK)
+    if WORK:
+        fm.delete(0)
+        fm.insert_command(label="Disconnect", command=disconnect, index=0)
+    else:
+        fm.delete(0)
+        fm.insert_command(label="Connect", command=connect_to_server, index=0)
+
+
+def private_message():
     """ bind """
     # indexes = list_box.curselection()
     list_box_values = [list_box.get(idx) for idx in list_box.curselection()]
     print(list_box_values)
 
 root = Tk()
-
-m = Menu(root)
-root.config(menu=m)
-
-fm = Menu(m)                                #создается пункт меню с размещением на основном меню (m)
-m.add_cascade(label="Меню", menu=fm)         #пункту располагается на основном меню (m)
-fm.add_command(label="Connect", command=connect_to_server)
+root.resizable(False, False)  # Делает окно не меняемым в размерах
+root.title("Chat")
 
 # GLOBALS
 WORK = True  # Работает ли клиент (чтобы убить все потоки клиента, при закрытии окна)
 SOCK = None  # Соккет подключения к серверу
 SMILES = {':-)': PhotoImage(file='img/Smile.gif'), '^-^': PhotoImage(file='img/a115.gif')}
+
+m = Menu(root)
+root.config(menu=m)
+
+fm = Menu(m, tearoff=0)                      # создается пункт меню с размещением на основном меню (m)
+m.add_cascade(label="Меню", menu=fm)         # пункту располагается на основном меню (m)
+
+
+fm.add_command(label="Connect", command=connect_to_server)
+
+
+# fm.add_command(label="Disconnect", command=disconnect)
+# fm.delete(0)
+
+fm.add_command(label="Exit", command=on_close)  # Кнопка закрывающая окно
+# fm.insert_command(label='Test', index=LAST)
 
 # MAIN
 content_frame = Frame(root, bg='blue', bd=1)
@@ -166,7 +199,7 @@ text_frame = Frame(content_frame, bg='blue', bd=1)
 input_frame = Frame(root, bg='blue', bd=1)
 tex = Text(text_frame,)
 but = Button(input_frame, text='Отправить')
-label = Label(input_frame, text="new")
+label = Label(input_frame, text="No_Name")
 list_box = Listbox(content_frame)
 ent = Entry(input_frame, width=80)
 scr = Scrollbar(text_frame, command=tex.yview)
@@ -186,8 +219,6 @@ but.pack(side='left')
 but.bind('<Button-1>', send)
 ent.bind('<Return>', send)
 list_box.bind('<Double-Button-1>', private_message)
-
-add_nick('new')
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 mainloop()

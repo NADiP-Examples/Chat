@@ -33,7 +33,7 @@ def connect(conn, clients):
                 for el in clients:
                     el.send(nick_send.encode())
         # Отключения клиента без ошибки
-        except (ConnectionResetError, BrokenPipeError):
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
             print('disconnected')
             num_conn = clients.index(conn)
             nick_send = g_nicks[num_conn]
