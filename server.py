@@ -25,6 +25,7 @@ def connect(conn, clients):
                 nick_send = data
                 nick_send = '#nickadd:'+nick_send
                 time.sleep(0.2)
+
                 for el in clients:
                     el.send(nick_send.encode())
                 welcome_message = "Welcome, %s" % data
@@ -35,6 +36,21 @@ def connect(conn, clients):
 
                 num_conn = clients.index(conn)
                 nick_send = "%s:%s" % (g_nicks[num_conn], data)
+
+
+                #Отсылка приватного сообщения
+                cntn = False
+                for nmb, nick in enumerate(g_nicks):
+                    st = data.partition(nick)
+                    if st[0]=='/w ':
+                        nick_send = '%s:%s' % (g_nicks[num_conn], st[2][1:])
+                        clients[nmb].send(nick_send.encode())
+                        clients[num_conn].send(nick_send.encode())
+                        cntn = True
+                if cntn:
+                    continue
+
+
 
                 for el in clients:
                     el.send(nick_send.encode())
