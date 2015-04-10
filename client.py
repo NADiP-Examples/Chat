@@ -175,7 +175,9 @@ def private_message(events):
     """ bind """
     # indexes = list_box.curselection()
     list_box_values = [list_box.get(idx) for idx in list_box.curselection()]
-    print(list_box_values)
+    ent.delete(0, END)
+    ent.insert(END, '/w %s ' % list_box_values[0])
+    ent.focus_set()
 
 root = Tk()
 root.resizable(False, False)
