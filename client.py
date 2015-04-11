@@ -33,10 +33,14 @@ def receive(conn):
         conn.setblocking(0)
         try:
             message = SOCK.recv(1024).decode()
-            # print(message)
         except socket.error:  # данных нет
             continue
         message = parser_command(message)
+        Nduplicate='nickduplicate'
+        if Nduplicate in message:
+                global ERROR
+                ERROR = True
+                enter_nickname()
         if isinstance(message, tuple):
             command, value = message
             if command == 'nickadd':
@@ -66,6 +70,8 @@ def enter_nickname():
     ent_nick = Entry(win)
     ent_nick.pack()
     ent_nick.insert(END, 'User')
+    if ERROR:
+        Label(win, text="Выберите новый ник, данный уже занят", bg="red").pack()
     but_send_nick = Button(win, text="Ok")
     but_send_nick.pack()
     but_send_nick.bind('<Button-1>', send_nick)
@@ -194,6 +200,7 @@ fm.add_command(label="Connect", command=connect_to_server)
 # GLOBALS
 WORK = True  # Работает ли клиент (чтобы убить все потоки клиента, при закрытии окна)
 SOCK = None  # Соккет подключения к серверу
+ERROR = False
 SMILES = {':-)': PhotoImage(file='img/Smile.gif'), '^-^': PhotoImage(file='img/a115.gif')}
 
 # MAIN

@@ -1,6 +1,5 @@
 import socket
 from threading import Thread
-import time
 
 
 def connect(conn, clients):
@@ -8,63 +7,42 @@ def connect(conn, clients):
     while True:
         try:
             data = conn.recv(1024)
-            # Определение первого сообщения подключившегося клиента
-            if not (conn in clients):
-                data = data.decode()
-                clients.append(conn)  # Добавление в список клиентов
-
-                # Отсылает список ников клиенту
-                if g_nicks:
-                    g_nicks_message = ','.join(g_nicks)
-                    g_nicks_message = '#listnicks:'+g_nicks_message
-                    conn.send(g_nicks_message.encode())
-
-                g_nicks.append(data)  # Добавление в список ников
-
-                # Рассылка информации об добавлении клиента в панель "Ников"
-                nick_send = data
-                nick_send = '#nickadd:'+nick_send
-                time.sleep(0.2)
-
-                for el in clients:
-                    el.send(nick_send.encode())
-                welcome_message = "Welcome, %s" % data
-                time.sleep(0.1)
-                conn.send(welcome_message.encode())
+            data = data.decode()
+            Nduplicate = '#nickduplicate:'
+            if data in g_nicks:
+                conn.send(Nduplicate.encode())
             else:
-                data = data.decode()
+            # Определение первого сообщения подключившегося клиента
+                if not (conn in clients):
+                    clients.append(conn)  # Добавление в список клиентов
+                    g_nicks.append(data)  # Добавление в список ников
 
-                num_conn = clients.index(conn)
-                nick_send = "%s:%s" % (g_nicks[num_conn], data)
+                    # Рассылка информации об добавлении клиента в панель "Ников"
+                    nick_send = data
+                    nick_send = '#nickadd:' + nick_send
+                    for el in clients:
+                        el.send(nick_send.encode())
 
+                    welcome_message = "Welcome, %s" % data
+                    conn.send(welcome_message.encode())
+                else:
+                    num_conn = clients.index(conn)
+                    nick_send = "%s:%s" % (g_nicks[num_conn], data)
 
-                #Отсылка приватного сообщения
-                cntn = False
-                for nmb, nick in enumerate(g_nicks):
-                    st = data.partition(nick)
-                    if st[0]=='/w ':
-                        nick_send = '%s:%s' % (g_nicks[num_conn], st[2][1:])
-                        clients[nmb].send(nick_send.encode())
-                        clients[num_conn].send(nick_send.encode())
-                        cntn = True
-                if cntn:
-                    continue
-
-
-
-                for el in clients:
-                    el.send(nick_send.encode())
-        # Отключения клиента без ошибки
+                    for el in clients:
+                        el.send(nick_send.encode())
+            # Отключения клиента без ошибки
         except (ConnectionResetError, BrokenPipeError):
-            print('disconnected')
-            num_conn = clients.index(conn)
-            nick_send = g_nicks[num_conn]
-            g_nicks.remove(nick_send)  # Удаление из списка ников
-            clients.remove(conn)  # Удаление из списка подключений
-            # Рассылка информации об удалении клиента из панели "Ников"
-            for el in clients:
-                el.send(('#nickdelete:'+nick_send).encode())
-            return
+                    print('disconnected')
+                    num_conn = clients.index(conn)
+                    nick_send = g_nicks[num_conn]
+                    g_nicks.remove(nick_send)  # Удаление из списка ников
+                    clients.remove(conn)  # Удаление из списка подключений
+                    # Рассылка информации об удалении клиента из панели "Ников"
+                    for el in clients:
+                        nick_send = '#nickdelete:'+nick_send
+                        el.send(nick_send.encode())
+                    return
 
 # GLOBALS
 g_nicks = []
